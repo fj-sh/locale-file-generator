@@ -5,9 +5,16 @@
     <div class="content-center">
       <select-language>
         <template #label>
-          Source Language:
+          Source Language
         </template>
       </select-language>
+      <select-format>
+        <template #label>
+          Format
+        </template>
+      </select-format>
+      <text-field />
+      <result />
     </div>
   </main>
 </template>
@@ -15,10 +22,16 @@
 import { defineComponent, ref } from '@nuxtjs/composition-api'
 import { useTranslateApi } from '~/composables/useTranslateApi'
 import SelectLanguage from '~/components/molecules/SelectLanguage.vue'
+import SelectFormat from '~/components/molecules/SelectFormat.vue'
+import Result from '~/components/atoms/Result.vue'
+import TextField from '~/components/atoms/TextField.vue'
 
 export default defineComponent({
   components: {
-    SelectLanguage
+    SelectLanguage,
+    SelectFormat,
+    TextField,
+    Result
   },
   setup () {
     const { loadApi } = useTranslateApi()
@@ -34,9 +47,12 @@ export default defineComponent({
 
     translate()
 
+    const result = ref('')
+
     return {
       source,
-      displayText
+      displayText,
+      result
     }
   }
 })

@@ -1,12 +1,13 @@
 <template>
   <div>
-    <span class="text-gray-700"><slot name="label">Source Language:</slot></span>
-    <select v-model="selected" class=" w-80 border bg-white rounded px-3 py-2" @change="selectSource">
-      <option v-for="item in items" :key="item.value" :value="item.value" class="py-1">
-        {{ item.label }}
-      </option>
-    </select>
-    {{ selected }}
+    <label class="block mt-4">
+      <span class="text-gray-700"><slot name="label">Source Language:</slot></span>
+      <select v-model="selected" class="w-80 border bg-white rounded px-3 py-2 form-select mt-1 block" @change="selectSource">
+        <option v-for="item in items" :key="item.value" :value="item.value" class="py-1">
+          {{ item.label }}
+        </option>
+      </select>
+    </label>
   </div>
 </template>
 <script lang="ts">
@@ -26,9 +27,9 @@ export default defineComponent({
       { label: 'Simplified Chinese', value: 'zh-CN' },
       { label: 'Traditional Chinese', value: 'zh-TW' }
     ]
-    const selectSource = (e) => {
-      console.log(e.target.value)
-      emit('select-language', e.target.value)
+    const selectSource = (e: Event) => {
+      console.log((e.target as HTMLInputElement).value)
+      emit('select-language', (e.target as HTMLInputElement).value)
     }
     return {
       selected,
