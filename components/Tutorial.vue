@@ -1,19 +1,20 @@
 <!-- Please remove this file from your project -->
 <template>
   <main class="container mx-auto">
-    <textarea v-model="displayText" />
     <div class="content-center">
-      <select-language>
+      <select-form :default-item="sourceLanguage" :items="sourceLanguages" @select-item="selectSourceLangage">
         <template #label>
           Source Language
         </template>
-      </select-language>
-      <select-format>
+      </select-form>
+
+      <select-form :default-item="targetFormat" :items="targetFormats" @select-item="selectTargetFormat">
         <template #label>
-          Format
+          Target Format
         </template>
-      </select-format>
-      <text-field />
+      </select-form>
+
+      <key-text-group />
       <result />
     </div>
   </main>
@@ -21,23 +22,42 @@
 <script lang="ts">
 import { defineComponent, ref } from '@nuxtjs/composition-api'
 import { useTranslateApi } from '~/composables/useTranslateApi'
-import SelectLanguage from '~/components/molecules/SelectLanguage.vue'
-import SelectFormat from '~/components/molecules/SelectFormat.vue'
+import SelectForm from '~/components/atoms/SelectForm.vue'
 import Result from '~/components/atoms/Result.vue'
-import TextField from '~/components/atoms/TextField.vue'
+import KeyTextGroup from '~/components/molecules/KeyTextGroup.vue'
 
 export default defineComponent({
   components: {
-    SelectLanguage,
-    SelectFormat,
-    TextField,
+    SelectForm,
+    KeyTextGroup,
     Result
   },
   setup () {
     const { loadApi } = useTranslateApi()
 
-    const source = ref('')
     const displayText = ref('')
+    const sourceLanguage = ref('ja')
+    const sourceLanguages = [
+      { label: 'Japanese', value: 'ja' },
+      { label: 'English', value: 'en' },
+      { label: 'Korean', value: 'ko' },
+      { label: 'Simplified Chinese', value: 'zh-CN' },
+      { label: 'Traditional Chinese', value: 'zh-TW' }
+    ]
+
+    const selectSourceLangage = (value) => {
+      sourceLanguage.value = value
+    }
+
+    const targetFormat = ref('language-js')
+    const targetFormats = [
+      { label: 'JavaScript', value: 'language-js' },
+      { label: 'YAML', value: 'language-yaml' }
+    ]
+
+    const selectTargetFormat = (value) => {
+      targetFormat.value = value
+    }
 
     const translate = async () => {
       const result = await loadApi('こんにちは', 'ja', 'en')
@@ -50,7 +70,12 @@ export default defineComponent({
     const result = ref('')
 
     return {
-      source,
+      sourceLanguage,
+      sourceLanguages,
+      selectSourceLangage,
+      targetFormat,
+      targetFormats,
+      selectTargetFormat,
       displayText,
       result
     }
