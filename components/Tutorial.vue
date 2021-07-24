@@ -14,7 +14,12 @@
         </template>
       </select-form>
 
-      <key-text-group />
+      <variable-text-group
+        :variable-texts="variableTexts"
+        @update-variable="updateVariable"
+        @update-text="updateText"
+        @add-text-field="addTextField"
+      />
       <result />
     </div>
   </main>
@@ -24,16 +29,17 @@ import { defineComponent, ref } from '@nuxtjs/composition-api'
 import { useTranslateApi } from '~/composables/useTranslateApi'
 import SelectForm from '~/components/atoms/SelectForm.vue'
 import Result from '~/components/atoms/Result.vue'
-import KeyTextGroup from '~/components/molecules/KeyTextGroup.vue'
+import VariableTextGroup from '~/components/molecules/VariableTextGroup.vue'
+import { VariableText } from '~/types/variableText'
 
 export default defineComponent({
   components: {
     SelectForm,
-    KeyTextGroup,
+    VariableTextGroup,
     Result
   },
   setup () {
-    const { loadApi } = useTranslateApi()
+    const { translate } = useTranslateApi()
 
     const displayText = ref('')
     const sourceLanguage = ref('ja')
@@ -59,13 +65,32 @@ export default defineComponent({
       targetFormat.value = value
     }
 
-    const translate = async () => {
-      const result = await loadApi('こんにちは', 'ja', 'en')
-      console.log('result', result)
-      displayText.value = result
+    const variableTexts = ref<Array<VariableText>>([
+      {
+        variable: '',
+        text: ''
+      }
+    ])
+
+    const updateVariable = (index, value) => {
+      if (variableTexts.value[index]) {
+        variableTexts.value[index].variable = value
+      }
     }
 
-    translate()
+    const updateText = (index, value) => {
+      if (variableTexts.value[index]) {
+        variableTexts.value[index].text = value
+      }
+    }
+
+    const addTextField = () => {
+      variableTexts.value.push({
+        variable: '',
+        text: ''
+      })
+      // translate(variableTexts.value)
+    }
 
     const result = ref('')
 
@@ -76,6 +101,10 @@ export default defineComponent({
       targetFormat,
       targetFormats,
       selectTargetFormat,
+      variableTexts,
+      updateVariable,
+      updateText,
+      addTextField,
       displayText,
       result
     }

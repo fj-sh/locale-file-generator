@@ -1,7 +1,7 @@
 <template>
   <div>
     <text-field
-      v-for="(item, index) in keyTexts"
+      v-for="(item, index) in variableTexts"
       :key="index"
       :variable.sync="item.variable"
       :text.sync="item.text"
@@ -18,42 +18,35 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from '@nuxtjs/composition-api'
+import { defineComponent, PropType } from '@nuxtjs/composition-api'
 import TextField from '~/components/atoms/TextField.vue'
 import { VariableText } from '~/types/variableText'
 export default defineComponent({
-  name: 'KeyTextGroup',
+  name: 'VariableTextGroup',
   components: {
     TextField
   },
-  setup (_props) {
-    const keyTexts = ref<Array<VariableText>>([
-      {
-        variable: '',
-        text: ''
-      }
-    ])
-
+  props: {
+    variableTexts: {
+      type: Array as PropType<VariableText[]>,
+      required: true
+    }
+  },
+  emits: ['update-variable', 'update-text', 'add-text-field'],
+  setup (_props, { emit }) {
     const updateVariable = (index, value) => {
-      if (keyTexts.value[index]) {
-        keyTexts.value[index].variable = value
-      }
+      emit('update-variable', index, value)
     }
 
     const updateText = (index, value) => {
-      if (keyTexts.value[index]) {
-        keyTexts.value[index].text = value
-      }
+      console.log('updateText:', index, value)
+      emit('update-text', index, value)
     }
     const addTextField = () => {
-      keyTexts.value.push({
-        variable: '',
-        text: ''
-      })
+      emit('add-text-field')
     }
 
     return {
-      keyTexts: keyTexts.value,
       updateVariable,
       updateText,
       addTextField
