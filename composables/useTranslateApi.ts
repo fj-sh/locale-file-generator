@@ -72,10 +72,6 @@ export const useTranslateApi = () => {
       checked: false
     },
     {
-      name: 'fs',
-      checked: false
-    },
-    {
       name: 'de',
       checked: false
     }

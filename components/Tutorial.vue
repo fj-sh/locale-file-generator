@@ -133,7 +133,7 @@ export default defineComponent({
           translate(variableTexts.value, sourceLanguage.value, targetLanguage.name)
         }
       })
-      await new Promise(resolve => setTimeout(resolve, 10000))
+      await new Promise(resolve => setTimeout(resolve, 8000))
       convert(sourceLanguage.value)
       setIsLoading(false)
     }
