@@ -12,15 +12,13 @@
 </template>
 <script lang="ts">
 import { defineComponent, PropType, ref } from '@nuxtjs/composition-api'
+import { SelectForm } from '~/types/selectForm'
 
 export default defineComponent({
   name: 'SelectForm',
-  emits: [
-    'select-item'
-  ],
   props: {
     items: {
-      type: PropType as Object,
+      type: Array as PropType<SelectForm[]>,
       required: true
     },
     defaultItem: {
@@ -28,8 +26,9 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['select-item'],
   setup (props, { emit }) {
-    const selectedItem = ref(props.defaultItem)
+    const selectedItem = ref<string>(props.defaultItem)
     const selectItem = (e: Event) => {
       emit('select-item', (e.target as HTMLInputElement).value)
     }
@@ -38,6 +37,7 @@ export default defineComponent({
       selectedItem
     }
   }
+
 })
 </script>
 <style lang="scss" scoped>

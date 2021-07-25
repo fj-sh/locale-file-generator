@@ -34,11 +34,11 @@ export default defineComponent({
   },
   emits: ['update-variable', 'update-text', 'add-text-field'],
   setup (_props, { emit }) {
-    const updateVariable = (index, value) => {
+    const updateVariable = (index: number, value: string) => {
       emit('update-variable', index, value)
     }
 
-    const updateText = (index, value) => {
+    const updateText = (index: number, value: string) => {
       console.log('updateText:', index, value)
       emit('update-text', index, value)
     }

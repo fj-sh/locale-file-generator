@@ -1,10 +1,7 @@
 <template>
   <div>
     <pre><code class="language-js">
-      const posts = await client.getEntries({
-        content_type: process.env.CTF_BLOG_POST_TYPE_ID,
-        'fields.slug': slug,
-      })
+      {{ result }}
 </code></pre>
   </div>
 </template>
@@ -15,6 +12,12 @@ import { defineComponent } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   name: 'Result',
+  props: {
+    result: {
+      type: String,
+      required: true
+    }
+  },
   setup () {
     const prismAll = () => {
       Prism.highlightAll()

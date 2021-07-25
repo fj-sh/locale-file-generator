@@ -1,45 +1,63 @@
 <!-- Please remove this file from your project -->
 <template>
-  <main class="container mx-auto">
-    <div class="content-center">
-      <select-form :default-item="sourceLanguage" :items="sourceLanguages" @select-item="selectSourceLangage">
-        <template #label>
-          Source Language
-        </template>
-      </select-form>
-
-      <select-form :default-item="targetFormat" :items="targetFormats" @select-item="selectTargetFormat">
-        <template #label>
-          Target Format
-        </template>
-      </select-form>
-
-      <variable-text-group
-        :variable-texts="variableTexts"
-        @update-variable="updateVariable"
-        @update-text="updateText"
-        @add-text-field="addTextField"
-      />
-      <result />
+  <div>
+    <div v-if="isLoading">
+      <loading />
     </div>
-  </main>
+    <main class="container mx-auto">
+      loading: {{ isLoading }}
+
+      <div class="content-center">
+        <select-form :default-item="sourceLanguage" :items="sourceLanguages" @select-item="selectSourceLangage">
+          <template #label>
+            Source Language
+          </template>
+        </select-form>
+
+        <select-form :default-item="targetFormat" :items="targetFormats" @select-item="selectTargetFormat">
+          <template #label>
+            Target Format
+          </template>
+        </select-form>
+
+        <variable-text-group
+          :variable-texts="variableTexts"
+          @update-variable="updateVariable"
+          @update-text="updateText"
+          @add-text-field="addTextField"
+        />
+
+        <div>
+          <button
+            class="w-1/2 my-8 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
+            @click="onClickGenerate"
+          >
+            Generate
+          </button>
+        </div>
+        <result :result="convertedResult" />
+      </div>
+    </main>
+  </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from '@nuxtjs/composition-api'
+import { defineComponent, reactive, ref } from '@nuxtjs/composition-api'
 import { useTranslateApi } from '~/composables/useTranslateApi'
 import SelectForm from '~/components/atoms/SelectForm.vue'
 import Result from '~/components/atoms/Result.vue'
 import VariableTextGroup from '~/components/molecules/VariableTextGroup.vue'
 import { VariableText } from '~/types/variableText'
+import Loading from '~/components/atoms/Loading.vue'
 
 export default defineComponent({
   components: {
     SelectForm,
     VariableTextGroup,
-    Result
+    Result,
+    Loading
   },
   setup () {
-    const { translate } = useTranslateApi()
+    const { translate, convert, convertedResult } = useTranslateApi()
 
     const displayText = ref('')
     const sourceLanguage = ref('ja')
@@ -51,7 +69,7 @@ export default defineComponent({
       { label: 'Traditional Chinese', value: 'zh-TW' }
     ]
 
-    const selectSourceLangage = (value) => {
+    const selectSourceLangage = (value: string) => {
       sourceLanguage.value = value
     }
 
@@ -61,7 +79,7 @@ export default defineComponent({
       { label: 'YAML', value: 'language-yaml' }
     ]
 
-    const selectTargetFormat = (value) => {
+    const selectTargetFormat = (value: string) => {
       targetFormat.value = value
     }
 
@@ -72,13 +90,13 @@ export default defineComponent({
       }
     ])
 
-    const updateVariable = (index, value) => {
+    const updateVariable = (index: number, value: string) => {
       if (variableTexts.value[index]) {
         variableTexts.value[index].variable = value
       }
     }
 
-    const updateText = (index, value) => {
+    const updateText = (index: number, value: string) => {
       if (variableTexts.value[index]) {
         variableTexts.value[index].text = value
       }
@@ -89,10 +107,21 @@ export default defineComponent({
         variable: '',
         text: ''
       })
-      // translate(variableTexts.value)
     }
 
-    const result = ref('')
+    const isLoading = ref<boolean>(false)
+    const setIsLoading = (loading: boolean) => {
+      isLoading.value = loading
+    }
+
+    const onClickGenerate = async () => {
+      translate(variableTexts.value)
+
+      setIsLoading(true)
+      convert()
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      setIsLoading(false)
+    }
 
     return {
       sourceLanguage,
@@ -106,7 +135,9 @@ export default defineComponent({
       updateText,
       addTextField,
       displayText,
-      result
+      onClickGenerate,
+      convertedResult,
+      isLoading
     }
   }
 })
