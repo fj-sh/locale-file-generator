@@ -39,7 +39,6 @@ export default defineComponent({
     }
 
     const updateText = (index: number, value: string) => {
-      console.log('updateText:', index, value)
       emit('update-text', index, value)
     }
     const addTextField = () => {

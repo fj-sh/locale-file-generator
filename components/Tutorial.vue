@@ -5,8 +5,10 @@
       <loading />
     </div>
     <main class="container mx-auto">
-      loading: {{ isLoading }}
-
+      <h1 class="text-2xl  font-semibold my-5">
+        i18nのロケールファイルを自動的に作るツール
+      </h1>
+      <p>i18nのロケールファイルを複数言語まとめて翻訳します。複数言語をGoogle翻訳で翻訳してコピペするのが面倒な人のためのツールです。</p>
       <div class="content-center">
         <select-form :default-item="sourceLanguage" :items="sourceLanguages" @select-item="selectSourceLangage">
           <template #label>
@@ -26,7 +28,7 @@
           @update-text="updateText"
           @add-text-field="addTextField"
         />
-
+        <checkbox :items="targetLanguages" @item-checked="targetLanguageChecked" />
         <div>
           <button
             class="w-1/2 my-8 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
@@ -41,23 +43,26 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref } from '@nuxtjs/composition-api'
+import { defineComponent, ref } from '@nuxtjs/composition-api'
 import { useTranslateApi } from '~/composables/useTranslateApi'
 import SelectForm from '~/components/atoms/SelectForm.vue'
 import Result from '~/components/atoms/Result.vue'
 import VariableTextGroup from '~/components/molecules/VariableTextGroup.vue'
 import { VariableText } from '~/types/variableText'
 import Loading from '~/components/atoms/Loading.vue'
+import { TargetLanguage } from '~/types/targetLangage'
+import Checkbox from '~/components/atoms/Checkbox.vue'
 
 export default defineComponent({
   components: {
     SelectForm,
     VariableTextGroup,
     Result,
-    Loading
+    Loading,
+    Checkbox
   },
   setup () {
-    const { translate, convert, convertedResult } = useTranslateApi()
+    const { translate, convert, convertedResult, initConvert, initialize, targetLanguages } = useTranslateApi()
 
     const displayText = ref('')
     const sourceLanguage = ref('ja')
@@ -75,14 +80,15 @@ export default defineComponent({
 
     const targetFormat = ref('language-js')
     const targetFormats = [
-      { label: 'JavaScript', value: 'language-js' },
-      { label: 'YAML', value: 'language-yaml' }
+      { label: 'JavaScript', value: 'language-js' }
     ]
-
     const selectTargetFormat = (value: string) => {
       targetFormat.value = value
     }
 
+    /**
+     * 変数とテキスト名。変数が key で テキストが翻訳元の文字列となる。
+     */
     const variableTexts = ref<Array<VariableText>>([
       {
         variable: '',
@@ -114,12 +120,21 @@ export default defineComponent({
       isLoading.value = loading
     }
 
-    const onClickGenerate = async () => {
-      translate(variableTexts.value)
+    const targetLanguageChecked = (index: number) => {
+      targetLanguages.value[index].checked = !targetLanguages.value[index].checked
+    }
 
+    const onClickGenerate = async () => {
+      initialize()
       setIsLoading(true)
-      convert()
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      initConvert(variableTexts.value, sourceLanguage.value)
+      targetLanguages.value.forEach((targetLanguage) => {
+        if (targetLanguage.checked && sourceLanguage.value !== targetLanguage.name) {
+          translate(variableTexts.value, sourceLanguage.value, targetLanguage.name)
+        }
+      })
+      await new Promise(resolve => setTimeout(resolve, 6000))
+      convert(sourceLanguage.value)
       setIsLoading(false)
     }
 
@@ -137,7 +152,9 @@ export default defineComponent({
       displayText,
       onClickGenerate,
       convertedResult,
-      isLoading
+      isLoading,
+      targetLanguages,
+      targetLanguageChecked
     }
   }
 })
