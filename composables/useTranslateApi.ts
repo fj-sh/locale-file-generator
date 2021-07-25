@@ -41,7 +41,7 @@ export const useTranslateApi = () => {
     convertedResult.value = 'export const messages = {\n'
     convertedResult.value += `\t${sourceLanguage}: {\n`
     variableTexts.forEach((variableText) => {
-      convertedResult.value += `\t\t${variableText.variable}: ${variableText.text},\n`
+      convertedResult.value += `\t\t${variableText.variable}: "${variableText.text}",\n`
     })
     convertedResult.value += '\t},\n'
   }
