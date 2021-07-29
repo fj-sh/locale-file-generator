@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { ref } from '@nuxtjs/composition-api'
 import { VariableText } from '~/types/variableText'
 import { TranslatedItem } from '~/types/translatedItem'
@@ -7,31 +7,39 @@ import { TargetLanguage } from '~/types/targetLangage'
 export const useTranslateApi = () => {
   const url = 'https://script.google.com/macros/s/AKfycbyyVH7mh40xCJnaJhNVI7lrCnRnXca343jv2uDZZnaL4pD7jMEOyQ16i_jXNf93beZ-/exec'
 
-  const loadApi = (text: string, source: string, target: string) => {
-    const promise = axios.get(url, {
+  const loadApi = async (text: string, source: string, target: string, variable: string) => {
+    const translatedItem: TranslatedItem = await axios.get(url, {
       params: {
         text,
         source,
         target
       }
+    }).then((response) => {
+      return {
+        variable,
+        translatedText: response.data.text,
+        target
+      }
     })
-    const dataPromise = promise.then(response => response.data)
-    return dataPromise
+    return translatedItem
   }
 
   const translatedItems = ref<Array<TranslatedItem>>([])
 
   const translate = (variableTexts: VariableText[], source: string, target: string) => {
+    const promises: Array< Promise<TranslatedItem>> = []
     variableTexts.forEach((item, _index) => {
       if (source === target) return
 
-      loadApi(item.text, source, target).then((data) => {
-        translatedItems.value.push({
-          variable: item.variable,
-          translatedText: data.text,
-          target
-        })
+      const promise = loadApi(item.text, source, target, item.variable)
+      promises.push(promise)
+    })
+    Promise.all(promises).then((items) => {
+      items.forEach((item) => {
+        translatedItems.value.push(item)
       })
+    }).catch((error) => {
+      console.log(error)
     })
   }
 
@@ -81,7 +89,11 @@ export const useTranslateApi = () => {
     targetLanguages.value.forEach((targetLanguage) => {
       if (!targetLanguage.checked) return
       if (sourceLanguage !== targetLanguage.name) {
-        convertedResult.value += `\t${targetLanguage.name}: {\n`
+        if (targetLanguage.name.includes('-')) {
+          convertedResult.value += `\t'${targetLanguage.name}': {\n`
+        } else {
+          convertedResult.value += `\t${targetLanguage.name}: {\n`
+        }
       }
       translatedItems.value.forEach((translatedItem, _index) => {
         if (sourceLanguage !== targetLanguage.name && targetLanguage.name === translatedItem.target) {

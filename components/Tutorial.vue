@@ -50,7 +50,6 @@ import Result from '~/components/atoms/Result.vue'
 import VariableTextGroup from '~/components/molecules/VariableTextGroup.vue'
 import { VariableText } from '~/types/variableText'
 import Loading from '~/components/atoms/Loading.vue'
-import { TargetLanguage } from '~/types/targetLangage'
 import Checkbox from '~/components/atoms/Checkbox.vue'
 
 export default defineComponent({
